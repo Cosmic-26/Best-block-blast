@@ -3,272 +3,262 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Block Blast Clone</title>
+  <title>2K Basketball Challenge 3D</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Montserrat:wght@700;900&display=swap');
 
     * {
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
-      font-family: 'Fredoka', sans-serif;
+      font-family: 'Montserrat', sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #0b1120 0%, #151e33 50%, #0d1527 100%);
+      background-color: #030712;
       overflow: hidden;
+      margin: 0;
     }
 
-    /* Grid Cell Bevels */
-    .grid-cell {
-      background: rgba(255, 255, 255, 0.03);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -1px 1px rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-    }
-
-    .grid-cell.highlight-valid {
-      background: rgba(255, 255, 255, 0.25) !important;
-      border: 2px solid rgba(255, 255, 255, 0.7);
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-    }
-
-    .grid-cell.highlight-invalid {
-      background: rgba(239, 68, 68, 0.3) !important;
-      border: 2px solid rgba(239, 68, 68, 0.7);
-    }
-
-    /* Block Styling with Glossy 3D Effect */
-    .block-unit {
-      border-radius: 6px;
-      position: relative;
-      box-shadow: inset 0 3px 2px rgba(255, 255, 255, 0.45), inset 0 -3px 3px rgba(0, 0, 0, 0.35), 0 3px 6px rgba(0, 0, 0, 0.3);
-    }
-
-    .block-red { background: linear-gradient(135deg, #ff5252, #ff1744); border: 1px solid #ff8a80; }
-    .block-orange { background: linear-gradient(135deg, #ff9100, #ff6d00); border: 1px solid #ffd180; }
-    .block-yellow { background: linear-gradient(135deg, #ffd600, #ffab00); border: 1px solid #ffff8d; }
-    .block-green { background: linear-gradient(135deg, #00e676, #00c853); border: 1px solid #b9f6ca; }
-    .block-cyan { background: linear-gradient(135deg, #00e5ff, #00b0ff); border: 1px solid #84ffff; }
-    .block-blue { background: linear-gradient(135deg, #2979ff, #2962ff); border: 1px solid #82b1ff; }
-    .block-purple { background: linear-gradient(135deg, #d500f9, #aa00ff); border: 1px solid #ea80fc; }
-    .block-pink { background: linear-gradient(135deg, #ff4081, #f50057); border: 1px solid #ff80ab; }
-
-    /* Drag Ghost Overlay */
-    #drag-ghost {
-      position: fixed;
-      pointer-events: none;
-      z-index: 1000;
-      display: none;
-      transform: translate(-50%, -50%) scale(1.05);
-      filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.5));
-      transition: transform 0.05s linear;
-    }
-
-    /* Floating Score Popup */
-    .score-popup {
+    /* 2K Shot Meter Styling */
+    #shot-meter-container {
       position: absolute;
-      pointer-events: none;
-      font-weight: 800;
-      font-size: 1.75rem;
-      color: #ffe082;
-      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.6);
-      animation: floatUp 0.9s cubic-bezier(0.18, 0.89, 0.32, 1.28) FORWARDS;
-      z-index: 50;
-    }
-
-    @keyframes floatUp {
-      0% { opacity: 0; transform: translate(-50%, -20%) scale(0.5); }
-      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      100% { opacity: 0; transform: translate(-50%, -120%) scale(1); }
-    }
-
-    /* Combo Banner Popup */
-    .combo-banner {
-      position: absolute;
+      bottom: 120px;
       left: 50%;
-      top: 40%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 28px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 3px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(0,0,0,0.8);
+      display: none;
+      z-index: 30;
+    }
+
+    #shot-meter-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6 0%, #eab308 70%, #22c55e 90%, #ef4444 100%);
+      border-radius: 10px;
+      transition: width 0.03s linear;
+    }
+
+    #green-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 78%;
+      width: 8%;
+      background: rgba(34, 197, 94, 0.9);
+      border-left: 2px solid #fff;
+      border-right: 2px solid #fff;
+      box-shadow: 0 0 15px #22c55e;
+      z-index: 5;
+    }
+
+    #meter-marker {
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      left: 0%;
+      width: 6px;
+      background: #ffffff;
+      border-radius: 3px;
+      box-shadow: 0 0 8px #fff;
+      z-index: 10;
+    }
+
+    /* Green Light Splash Banner */
+    .green-splash {
+      position: absolute;
+      top: 30%;
+      left: 50%;
       transform: translate(-50%, -50%) scale(0.5);
+      font-family: 'Teko', sans-serif;
+      font-size: 80px;
+      font-weight: 700;
+      color: #22c55e;
+      text-shadow: 0 0 20px #22c55e, 0 0 40px #15803d, 0 0 60px #000;
       pointer-events: none;
-      z-index: 60;
-      font-size: 2.25rem;
-      font-weight: 900;
-      font-style: italic;
+      opacity: 0;
+      z-index: 40;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+    }
+
+    .green-splash.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    /* Grade Notification Toast */
+    #grade-toast {
+      position: absolute;
+      bottom: 160px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Teko', sans-serif;
+      font-size: 32px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
       text-transform: uppercase;
-      background: linear-gradient(to bottom, #fff, #ffd54f);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));
-      animation: comboPop 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) FORWARDS;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 35;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9);
     }
 
-    @keyframes comboPop {
-      0% { opacity: 0; transform: translate(-50%, -30%) scale(0.4) rotate(-5deg); }
-      25% { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(3deg); }
-      75% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-      100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
-    }
-
-    /* Shimmer & Glow for Board Frame */
-    .board-container {
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-    }
-
-    .clear-anim {
-      animation: pulseClear 0.25s ease-out forwards;
-    }
-
-    @keyframes pulseClear {
-      0% { transform: scale(1); filter: brightness(1); }
-      50% { transform: scale(1.15); filter: brightness(2); }
-      100% { transform: scale(0); opacity: 0; }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col items-center justify-between p-4 max-w-md mx-auto">
+<body class="w-screen h-screen relative select-none">
 
-  <!-- Header / Score Board -->
-  <header class="w-full flex items-center justify-between pt-2 px-2 z-10">
-    <div class="flex items-center gap-2">
-      <div class="w-10 h-10 rounded-xl bg-indigo-600/40 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shadow-lg">
-        <i class="fa-solid fa-shapes text-xl"></i>
+  <!-- 3D Canvas Container -->
+  <div id="canvas-container" class="w-full h-full absolute inset-0"></div>
+
+  <!-- HUD Overlay Header -->
+  <header class="absolute top-0 left-0 right-0 p-4 flex justify-between items-start pointer-events-none z-20">
+    <!-- Score & Streak Box -->
+    <div class="glass-panel p-3 rounded-2xl flex items-center gap-4 shadow-2xl">
+      <div>
+        <div class="text-[10px] text-slate-400 font-extrabold tracking-widest uppercase">SCORE</div>
+        <div id="score-val" class="text-3xl font-black text-white font-mono leading-none">0</div>
       </div>
-      <h1 class="text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
-        BLOCK BLAST
-      </h1>
+      <div class="h-8 w-px bg-slate-700"></div>
+      <div>
+        <div class="text-[10px] text-amber-400 font-extrabold tracking-widest uppercase">STREAK</div>
+        <div id="streak-val" class="text-3xl font-black text-amber-400 font-mono leading-none">0</div>
+      </div>
+      <div class="h-8 w-px bg-slate-700"></div>
+      <div>
+        <div class="text-[10px] text-indigo-400 font-extrabold tracking-widest uppercase">BEST</div>
+        <div id="best-val" class="text-3xl font-black text-indigo-300 font-mono leading-none">0</div>
+      </div>
     </div>
 
-    <!-- Controls & Scores -->
-    <div class="flex items-center gap-3">
-      <button id="btn-sound" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 text-slate-300 flex items-center justify-center hover:bg-slate-700 transition">
-        <i class="fa-solid fa-volume-high text-lg" id="sound-icon"></i>
+    <!-- Timer / Mode Info -->
+    <div class="glass-panel px-4 py-2.5 rounded-2xl text-center shadow-2xl">
+      <div id="mode-label" class="text-[10px] text-slate-400 font-extrabold tracking-widest uppercase">FREE SHOOTAROUND</div>
+      <div id="timer-val" class="text-3xl font-black text-white font-mono leading-none mt-0.5">--</div>
+    </div>
+
+    <!-- Camera / Sound Controls -->
+    <div class="flex gap-2 pointer-events-auto">
+      <button id="btn-cam" class="w-11 h-11 glass-panel rounded-2xl text-white flex items-center justify-center hover:bg-slate-700/80 active:scale-95 transition shadow-lg">
+        <i class="fa-solid fa-video text-sm"></i>
       </button>
-      <button id="btn-restart" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 text-slate-300 flex items-center justify-center hover:bg-slate-700 transition">
-        <i class="fa-solid fa-rotate-right text-lg"></i>
+      <button id="btn-audio" class="w-11 h-11 glass-panel rounded-2xl text-white flex items-center justify-center hover:bg-slate-700/80 active:scale-95 transition shadow-lg">
+        <i class="fa-solid fa-volume-high text-sm" id="audio-icon"></i>
+      </button>
+      <button id="btn-menu" class="w-11 h-11 glass-panel rounded-2xl text-white flex items-center justify-center hover:bg-slate-700/80 active:scale-95 transition shadow-lg">
+        <i class="fa-solid fa-bars text-sm"></i>
       </button>
     </div>
   </header>
 
-  <!-- Score Cards -->
-  <div class="w-full grid grid-cols-2 gap-3 my-2 z-10">
-    <div class="bg-slate-800/50 backdrop-blur-md border border-slate-700/50 rounded-2xl p-2.5 text-center shadow-md">
-      <div class="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-0.5">Score</div>
-      <div id="score-text" class="text-2xl font-extrabold text-white">0</div>
-    </div>
-    <div class="bg-slate-800/50 backdrop-blur-md border border-slate-700/50 rounded-2xl p-2.5 text-center shadow-md">
-      <div class="text-xs uppercase tracking-widest text-amber-400/80 font-semibold mb-0.5"><i class="fa-solid fa-trophy mr-1"></i>Best</div>
-      <div id="best-score-text" class="text-2xl font-extrabold text-amber-300">0</div>
-    </div>
+  <!-- Shot Grade Banner Toast -->
+  <div id="grade-toast" class="text-white">SLIGHTLY LATE</div>
+
+  <!-- Green Release Banner Overlay -->
+  <div id="green-splash" class="green-splash">EXCELLENT RELEASE!</div>
+
+  <!-- 2K Shot Meter -->
+  <div id="shot-meter-container">
+    <div id="green-zone"></div>
+    <div id="shot-meter-bar"></div>
+    <div id="meter-marker"></div>
   </div>
 
-  <!-- Main 8x8 Puzzle Board -->
-  <main class="relative w-full aspect-square max-w-[380px] my-auto">
-    <div class="board-container w-full h-full p-2.5 rounded-3xl border border-slate-700/60 relative overflow-hidden">
-      <!-- 8x8 Grid Canvas & Containers -->
-      <div id="board-grid" class="grid grid-cols-8 grid-rows-8 gap-1.5 w-full h-full relative">
-        <!-- Cells generated dynamically -->
-      </div>
-
-      <!-- Particle Canvas Overlay -->
-      <canvas id="particle-canvas" class="absolute inset-0 pointer-events-none z-30 w-full h-full"></canvas>
+  <!-- Controls Footer / On-screen Shoot Button -->
+  <footer class="absolute bottom-6 left-0 right-0 px-6 flex justify-between items-end z-20 pointer-events-none">
+    <!-- Distance & Spot Info -->
+    <div class="glass-panel px-4 py-2.5 rounded-2xl pointer-events-auto">
+      <div class="text-[10px] text-slate-400 font-extrabold tracking-widest uppercase">SHOT DISTANCE</div>
+      <div id="distance-val" class="text-xl font-black text-cyan-400 font-mono">24.2 FT</div>
     </div>
-  </main>
 
-  <!-- Bottom Block Selection Tray -->
-  <footer class="w-full my-2 z-10">
-    <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-3 flex justify-around items-center min-h-[120px] shadow-inner">
-      <div id="slot-0" class="block-slot w-24 h-24 flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
-      <div id="slot-1" class="block-slot w-24 h-24 flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
-      <div id="slot-2" class="block-slot w-24 h-24 flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
+    <!-- Shoot Action Button (Mobile/Touch & Onscreen) -->
+    <div class="flex flex-col items-center gap-1 pointer-events-auto">
+      <button id="btn-shoot" class="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 border-4 border-white/30 text-white font-black text-lg shadow-2xl shadow-purple-500/50 active:scale-90 transition duration-75 flex flex-col items-center justify-center gap-0.5">
+        <i class="fa-solid fa-basketball text-2xl"></i>
+        <span class="text-[11px] tracking-wider uppercase font-extrabold">HOLD</span>
+      </button>
+      <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase bg-slate-900/80 px-2 py-0.5 rounded-full border border-slate-700/60">SPACEBAR / TAP</span>
+    </div>
+
+    <!-- Spot Navigation Selector -->
+    <div class="glass-panel p-2 rounded-2xl flex gap-1.5 pointer-events-auto">
+      <button id="spot-left" class="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button id="spot-random" class="px-3 h-10 rounded-xl bg-indigo-600 text-white font-extrabold text-xs uppercase tracking-wider hover:bg-indigo-500 transition">
+        MOVE SPOT
+      </button>
+      <button id="spot-right" class="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center justify-center transition">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
     </div>
   </footer>
 
-  <!-- Ghost Element for Dragging -->
-  <div id="drag-ghost"></div>
-
-  <!-- Game Over Modal -->
-  <div id="game-over-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-lg flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300 p-4">
-    <div class="bg-slate-900 border border-slate-700/80 w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-content">
-      <div class="w-16 h-16 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/30">
-        <i class="fa-solid fa-gamepad text-3xl text-white"></i>
-      </div>
-      <h2 class="text-3xl font-black text-white tracking-wide mb-1">NO MORE MOVES!</h2>
-      <p class="text-slate-400 text-sm mb-6">Board is full for available pieces</p>
-
-      <div class="bg-slate-800/80 rounded-2xl p-4 mb-6 space-y-3 border border-slate-700/50">
-        <div class="flex justify-between items-center text-slate-300">
-          <span class="font-medium">Final Score</span>
-          <span id="final-score" class="text-2xl font-bold text-white">0</span>
+  <!-- Main Game Selection Menu Modal -->
+  <div id="menu-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-8 rounded-3xl w-full max-w-md text-center border border-slate-700/80 shadow-2xl space-y-6">
+      <div>
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-600 text-white text-3xl shadow-lg shadow-red-500/30 mb-3">
+          <i class="fa-solid fa-basketball"></i>
         </div>
-        <div class="h-px bg-slate-700/50 w-full"></div>
-        <div class="flex justify-between items-center text-amber-400">
-          <span class="font-medium">Best Score</span>
-          <span id="modal-best-score" class="text-2xl font-bold">0</span>
-        </div>
+        <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-red-500 tracking-wider">
+          2K HOOPS 3D
+        </h1>
+        <p class="text-xs text-slate-400 font-semibold mt-1">PRO ARCADE BASKETBALL SIMULATOR</p>
       </div>
 
-      <button id="btn-modal-restart" class="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-lg shadow-lg hover:brightness-110 active:scale-95 transition">
-        PLAY AGAIN
+      <!-- Mode Selector Buttons -->
+      <div class="space-y-3 text-left">
+        <button id="mode-shootaround" class="w-full p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 hover:border-indigo-500 text-white transition flex items-center justify-between group">
+          <div>
+            <div class="font-extrabold text-sm text-indigo-300 group-hover:text-indigo-200">FREE SHOOTAROUND</div>
+            <div class="text-[11px] text-slate-400">Practice shot timing from various spots</div>
+          </div>
+          <i class="fa-solid fa-play text-slate-500 group-hover:text-indigo-400 transition"></i>
+        </button>
+
+        <button id="mode-3point" class="w-full p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-500 text-white transition flex items-center justify-between group">
+          <div>
+            <div class="font-extrabold text-sm text-amber-400 group-hover:text-amber-300">3-POINT CONTEST</div>
+            <div class="text-[11px] text-slate-400">60s timed session with Money Balls (2 pts)</div>
+          </div>
+          <i class="fa-solid fa-fire text-slate-500 group-hover:text-amber-400 transition"></i>
+        </button>
+
+        <button id="mode-dunk" class="w-full p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 hover:border-emerald-500 text-white transition flex items-center justify-between group">
+          <div>
+            <div class="font-extrabold text-sm text-emerald-400 group-hover:text-emerald-300">DRIVE & DUNK MODE</div>
+            <div class="text-[11px] text-slate-400">Drive to the basket for dunks & layups</div>
+          </div>
+          <i class="fa-solid fa-bolt text-slate-500 group-hover:text-emerald-400 transition"></i>
+        </button>
+      </div>
+
+      <button id="btn-start-game" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white font-black text-lg tracking-wider shadow-lg shadow-orange-500/40 hover:opacity-95 active:scale-95 transition">
+        ENTER COURT
       </button>
     </div>
   </div>
 
   <script>
-    /* ==========================================================================
-       1. GAME CONSTANTS & PIECE DEFINITIONS
-       ========================================================================== */
-    const GRID_SIZE = 8;
-    
-    // Color Palette mapping
-    const COLOR_CLASSES = [
-      'block-red',    // 0
-      'block-orange', // 1
-      'block-yellow', // 2
-      'block-green',  // 3
-      'block-cyan',   // 4
-      'block-blue',   // 5
-      'block-purple', // 6
-      'block-pink'    // 7
-    ];
-
-    // Piece Shape Templates (Matrix 1s and 0s)
-    const PIECE_SHAPES = [
-      // Single
-      { shape: [[1]], name: 'dot' },
-      // 2-blocks
-      { shape: [[1, 1]], name: 'h2' },
-      { shape: [[1], [1]], name: 'v2' },
-      // 3-blocks
-      { shape: [[1, 1, 1]], name: 'h3' },
-      { shape: [[1], [1], [1]], name: 'v3' },
-      { shape: [[1, 1], [1, 0]], name: 'l3_1' },
-      { shape: [[1, 1], [0, 1]], name: 'l3_2' },
-      // 4-blocks
-      { shape: [[1, 1], [1, 1]], name: 'square' },
-      { shape: [[1, 1, 1, 1]], name: 'h4' },
-      { shape: [[1], [1], [1], [1]], name: 'v4' },
-      { shape: [[1, 1, 1], [1, 0, 0]], name: 'L4_1' },
-      { shape: [[1, 1, 1], [0, 0, 1]], name: 'L4_2' },
-      { shape: [[1, 0], [1, 0], [1, 1]], name: 'L4_3' },
-      { shape: [[0, 1], [0, 1], [1, 1]], name: 'L4_4' },
-      { shape: [[0, 1, 0], [1, 1, 1]], name: 'T4' },
-      { shape: [[1, 1, 0], [0, 1, 1]], name: 'Z4' },
-      { shape: [[0, 1, 1], [1, 1, 0]], name: 'S4' },
-      // 5-blocks & Large
-      { shape: [[1, 1, 1, 1, 1]], name: 'h5' },
-      { shape: [[1], [1], [1], [1], [1]], name: 'v5' },
-      { shape: [[1, 1, 1], [1, 0, 0], [1, 0, 0]], name: 'corner5' },
-      { shape: [[1, 1, 1], [1, 1, 1], [1, 1, 1]], name: 'big_square' },
-      { shape: [[1, 1, 1], [0, 1, 0], [0, 1, 0]], name: 'T5' }
-    ];
-
-    /* ==========================================================================
-       2. AUDIO SYNTHESIZER (Web Audio API)
-       ========================================================================== */
-    class SoundEngine {
+    /* ==========================================
+       1. WEB AUDIO SYNTHESIZER SYSTEM
+       ========================================== */
+    class AudioEngine {
       constructor() {
         this.ctx = null;
         this.muted = false;
@@ -279,724 +269,673 @@
           const AudioContext = window.AudioContext || window.webkitAudioContext;
           this.ctx = new AudioContext();
         }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
       }
 
-      playTone(freq, type, duration, gainVal = 0.1) {
-        if (this.muted || !this.ctx) return;
-        try {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = type;
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start();
-          osc.stop(this.ctx.currentTime + duration);
-        } catch(e) {}
-      }
-
-      playPickup() {
+      playBounce() {
+        if (this.muted) return;
         this.init();
-        this.playTone(440, 'sine', 0.08, 0.05);
-      }
-
-      playPlace() {
-        this.init();
-        if (this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.1);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+        osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(now + 0.1);
+        osc.stop(this.ctx.currentTime + 0.12);
       }
 
-      playClear(linesCount) {
+      playSwish() {
+        if (this.muted) return;
         this.init();
-        if (this.muted || !this.ctx) return;
-        const baseFreqs = [329.63, 392.00, 493.88, 587.33, 659.25, 783.99];
-        const count = Math.min(linesCount + 2, 6);
-        for (let i = 0; i < count; i++) {
-          setTimeout(() => {
-            this.playTone(baseFreqs[i % baseFreqs.length] * (1 + Math.floor(i/4)*0.5), 'sine', 0.25, 0.12);
-          }, i * 60);
+        // White noise swish net simulation
+        const bufferSize = this.ctx.sampleRate * 0.25;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
         }
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1200, this.ctx.currentTime);
+        filter.Q.setValueAtTime(3.0, this.ctx.currentTime);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+
+        whiteNoise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        whiteNoise.start();
       }
 
-      playGameOver() {
+      playRimClank() {
+        if (this.muted) return;
         this.init();
-        if (this.muted || !this.ctx) return;
-        const freqs = [300, 260, 220, 150];
-        freqs.forEach((f, idx) => {
-          setTimeout(() => {
-            this.playTone(f, 'sawtooth', 0.3, 0.1);
-          }, idx * 120);
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(850, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.18);
+      }
+
+      playGreenCheer() {
+        if (this.muted) return;
+        this.init();
+        // High note fanfare chime
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.05);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.05 + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.05);
+          osc.stop(this.ctx.currentTime + idx * 0.05 + 0.25);
         });
       }
     }
 
-    const sound = new SoundEngine();
+    const audioEngine = new AudioEngine();
 
-    /* ==========================================================================
-       3. PARTICLE SYSTEM
-       ========================================================================== */
-    class ParticleSystem {
-      constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.particles = [];
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-        this.loop();
-      }
-
-      resize() {
-        const rect = this.canvas.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = rect.height;
-      }
-
-      spawnCellBurst(x, y, colorHex) {
-        const count = 12;
-        for (let i = 0; i < count; i++) {
-          const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
-          const speed = 2 + Math.random() * 5;
-          this.particles.push({
-            x: x,
-            y: y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            size: 4 + Math.random() * 5,
-            color: colorHex,
-            alpha: 1,
-            life: 0.9 + Math.random() * 0.1,
-            decay: 0.02 + Math.random() * 0.03
-          });
-        }
-      }
-
-      loop() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-          const p = this.particles[i];
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += 0.15; // Gravity
-          p.alpha -= p.decay;
-          p.size *= 0.96;
-
-          if (p.alpha <= 0 || p.size <= 0.5) {
-            this.particles.splice(i, 1);
-            continue;
-          }
-
-          this.ctx.save();
-          this.ctx.globalAlpha = Math.max(0, p.alpha);
-          this.ctx.fillStyle = p.color;
-          this.ctx.beginPath();
-          this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          this.ctx.fill();
-          this.ctx.restore();
-        }
-        requestAnimationFrame(() => this.loop());
-      }
-    }
-
-    /* ==========================================================================
-       4. GAME STATE & DOM MANAGEMENT
-       ========================================================================== */
-    let board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-    let currentSlots = [null, null, null];
-    let score = 0;
-    let bestScore = parseInt(localStorage.getItem('block_blast_best') || '0', 10);
-    let comboStreak = 0;
-
-    // Dragging state
-    let activeDrag = null; // { slotIdx, piece, ghostElem, offsetX, offsetY, touchId }
-    let hoveredCells = [];
-
-    // DOM Elements
-    const boardGridEl = document.getElementById('board-grid');
-    const dragGhostEl = document.getElementById('drag-ghost');
-    const scoreTextEl = document.getElementById('score-text');
-    const bestScoreTextEl = document.getElementById('best-score-text');
-    const gameOverModal = document.getElementById('game-over-modal');
-    const particleCanvas = document.getElementById('particle-canvas');
-    let particleSys = null;
-
-    // Mapping Tailwind/CSS classes to particle hex colors
-    const COLOR_HEX_MAP = {
-      'block-red': '#ff1744',
-      'block-orange': '#ff6d00',
-      'block-yellow': '#ffab00',
-      'block-green': '#00c853',
-      'block-cyan': '#00b0ff',
-      'block-blue': '#2962ff',
-      'block-purple': '#aa00ff',
-      'block-pink': '#f50057'
+    /* ==========================================
+       2. THREE.JS 3D ARENA & GRAPHICS SYSTEM
+       ========================================== */
+    let scene, camera, renderer;
+    let ball, rim, backboard, net;
+    let ballPhysics = {
+      active: false,
+      pos: new THREE.Vector3(),
+      vel: new THREE.Vector3(),
+      rot: new THREE.Vector3(),
+      radius: 0.38
     };
 
-    /* Initialize Application */
-    function initGame() {
-      particleSys = new ParticleSystem(particleCanvas);
-      bestScoreTextEl.textContent = bestScore;
-      createBoardGrid();
-      setupEventListeners();
-      resetGame();
-    }
+    const HOOP_POS = new THREE.Vector3(0, 5.2, -18); // Rim center position
+    const HOOP_RADIUS = 0.75;
 
-    function createBoardGrid() {
-      boardGridEl.innerHTML = '';
-      for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-          const cell = document.createElement('div');
-          cell.className = 'grid-cell w-full h-full relative';
-          cell.dataset.row = r;
-          cell.dataset.col = c;
-          boardGridEl.appendChild(cell);
-        }
-      }
-    }
+    // Shooting Spots Preset Positions
+    const SPOTS = [
+      { name: 'Left Corner 3', pos: new THREE.Vector3(-14, 0, -16) },
+      { name: 'Left Wing 3', pos: new THREE.Vector3(-11, 0, -8) },
+      { name: 'Top of Key 3', pos: new THREE.Vector3(0, 0, -4) },
+      { name: 'Right Wing 3', pos: new THREE.Vector3(11, 0, -8) },
+      { name: 'Right Corner 3', pos: new THREE.Vector3(14, 0, -16) },
+      { name: 'Free Throw', pos: new THREE.Vector3(0, 0, -10) }
+    ];
 
-    function resetGame() {
-      board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-      score = 0;
-      comboStreak = 0;
-      updateScoreUI();
-      renderBoard();
-      spawnNewSlots();
-      hideGameOver();
-    }
+    let currentSpotIdx = 2; // Top of key default
+    let playerPos = SPOTS[currentSpotIdx].pos.clone();
 
-    function renderBoard() {
-      const cells = boardGridEl.children;
-      for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-          const idx = r * GRID_SIZE + c;
-          const cellEl = cells[idx];
-          cellEl.innerHTML = '';
-          const colorClass = board[r][c];
-          if (colorClass) {
-            const block = document.createElement('div');
-            block.className = `block-unit ${colorClass} w-full h-full`;
-            cellEl.appendChild(block);
-          }
-        }
-      }
-    }
+    // Camera Angles
+    const CAM_VIEWS = ['broadcast', 'player', 'baseline'];
+    let currentCamIdx = 0;
 
-    /* Spawn 3 pieces in bottom tray */
-    function spawnNewSlots() {
-      for (let i = 0; i < 3; i++) {
-        const randomPieceObj = PIECE_SHAPES[Math.floor(Math.random() * PIECE_SHAPES.length)];
-        const randomColor = COLOR_CLASSES[Math.floor(Math.random() * COLOR_CLASSES.length)];
-        currentSlots[i] = {
-          shape: randomPieceObj.shape,
-          color: randomColor
-        };
-        renderSlot(i);
-      }
-      checkGameOverCondition();
-    }
-
-    function renderSlot(slotIdx) {
-      const slotEl = document.getElementById(`slot-${slotIdx}`);
-      slotEl.innerHTML = '';
-      const piece = currentSlots[slotIdx];
-      if (!piece) return;
-
-      const gridContainer = document.createElement('div');
-      const rows = piece.shape.length;
-      const cols = piece.shape[0].length;
-
-      gridContainer.style.display = 'grid';
-      gridContainer.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
-      gridContainer.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-      gridContainer.style.gap = '3px';
+    function init3D() {
+      const container = document.getElementById('canvas-container');
       
-      // Calculate responsive preview size
-      const maxDim = Math.max(rows, cols);
-      const cellSize = maxDim > 3 ? 16 : 22;
-      gridContainer.style.width = `${cols * cellSize}px`;
-      gridContainer.style.height = `${rows * cellSize}px`;
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0f1d);
+      scene.fog = new THREE.FogExp2(0x0a0f1d, 0.015);
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const unit = document.createElement('div');
-          if (piece.shape[r][c] === 1) {
-            unit.className = `block-unit ${piece.color} w-full h-full`;
-          }
-          gridContainer.appendChild(unit);
-        }
-      }
-
-      slotEl.appendChild(gridContainer);
-    }
-
-    /* ==========================================================================
-       5. DRAG AND DROP HANDLING (MOUSE & TOUCH)
-       ========================================================================== */
-    function setupEventListeners() {
-      // Sound and Restart buttons
-      document.getElementById('btn-sound').addEventListener('click', toggleSound);
-      document.getElementById('btn-restart').addEventListener('click', resetGame);
-      document.getElementById('btn-modal-restart').addEventListener('click', resetGame);
-
-      // Slot drag triggers
-      for (let i = 0; i < 3; i++) {
-        const slotEl = document.getElementById(`slot-${i}`);
-        slotEl.addEventListener('mousedown', (e) => startDrag(e, i, false));
-        slotEl.addEventListener('touchstart', (e) => startDrag(e, i, true), { passive: false });
-      }
-
-      // Global Move & Release
-      window.addEventListener('mousemove', onDragMove);
-      window.addEventListener('touchmove', onDragMove, { passive: false });
-      window.addEventListener('mouseup', onDragEnd);
-      window.addEventListener('touchend', onDragEnd);
-      window.addEventListener('touchcancel', onDragEnd);
-    }
-
-    function toggleSound() {
-      sound.muted = !sound.muted;
-      const icon = document.getElementById('sound-icon');
-      icon.className = sound.muted ? 'fa-solid fa-volume-xmark text-lg text-rose-400' : 'fa-solid fa-volume-high text-lg';
-    }
-
-    function startDrag(e, slotIdx, isTouch) {
-      const piece = currentSlots[slotIdx];
-      if (!piece) return;
-
-      if (e.cancelable && isTouch) e.preventDefault();
-      sound.playPickup();
-
-      const touchObj = isTouch ? e.touches[0] : e;
-      const clientX = touchObj.clientX;
-      const clientY = touchObj.clientY;
-
-      // Render Drag Ghost Element
-      createDragGhost(piece);
-      dragGhostEl.style.display = 'block';
-
-      // Vertical offset for touch so finger does not obscure block preview
-      const touchOffsetY = isTouch ? 70 : 0;
-
-      activeDrag = {
-        slotIdx: slotIdx,
-        piece: piece,
-        touchOffsetY: touchOffsetY,
-        touchId: isTouch ? touchObj.identifier : null
-      };
-
-      updateDragGhostPosition(clientX, clientY - touchOffsetY);
-      highlightGridPlacement(clientX, clientY - touchOffsetY);
-    }
-
-    function createDragGhost(piece) {
-      dragGhostEl.innerHTML = '';
-      const rows = piece.shape.length;
-      const cols = piece.shape[0].length;
-
-      // Match actual board cell dimensions
-      const boardCell = boardGridEl.firstElementChild;
-      const rect = boardCell.getBoundingClientRect();
-      const cellSize = rect.width;
-
-      const container = document.createElement('div');
-      container.style.display = 'grid';
-      container.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
-      container.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
-      container.style.gap = '6px'; // Matches gap-1.5
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const unit = document.createElement('div');
-          if (piece.shape[r][c] === 1) {
-            unit.className = `block-unit ${piece.color} w-full h-full`;
-          }
-          container.appendChild(unit);
-        }
-      }
-      dragGhostEl.appendChild(container);
-    }
-
-    function updateDragGhostPosition(x, y) {
-      dragGhostEl.style.left = `${x}px`;
-      dragGhostEl.style.top = `${y}px`;
-    }
-
-    function onDragMove(e) {
-      if (!activeDrag) return;
-
-      let clientX, clientY;
-      if (e.touches) {
-        let touch = null;
-        for (let i = 0; i < e.touches.length; i++) {
-          if (e.touches[i].identifier === activeDrag.touchId) {
-            touch = e.touches[i];
-            break;
-          }
-        }
-        if (!touch) return;
-        clientX = touch.clientX;
-        clientY = touch.clientY;
-        if (e.cancelable) e.preventDefault();
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-
-      const targetY = clientY - activeDrag.touchOffsetY;
-      updateDragGhostPosition(clientX, targetY);
-      highlightGridPlacement(clientX, targetY);
-    }
-
-    function onDragEnd(e) {
-      if (!activeDrag) return;
-
-      clearGridHighlights();
-
-      // Find drop location cell
-      const ghostRect = dragGhostEl.getBoundingClientRect();
-      const centerX = ghostRect.left + ghostRect.width / 2;
-      const centerY = ghostRect.top + ghostRect.height / 2;
-
-      // Find board coordinates corresponding to top-left of the piece
-      const placement = getTargetGridPos(centerX, centerY, activeDrag.piece);
-
-      if (placement && canPlacePiece(activeDrag.piece.shape, placement.row, placement.col)) {
-        // Drop successfully
-        placePiece(activeDrag.piece, placement.row, placement.col);
-        
-        // Hide and clear slot piece
-        currentSlots[activeDrag.slotIdx] = null;
-        document.getElementById(`slot-${activeDrag.slotIdx}`).innerHTML = '';
-        
-        sound.playPlace();
-        
-        // Check for line clears
-        processLineClears(placement.row, placement.col, activeDrag.piece);
-
-        // Check if all 3 slots used
-        if (currentSlots.every(s => s === null)) {
-          spawnNewSlots();
-        } else {
-          checkGameOverCondition();
-        }
-      }
-
-      // Reset Drag state
-      dragGhostEl.style.display = 'none';
-      dragGhostEl.innerHTML = '';
-      activeDrag = null;
-    }
-
-    /* ==========================================================================
-       6. GRID LOGIC & PLACEMENT CALCULATIONS
-       ========================================================================== */
-    function getTargetGridPos(ghostCenterX, ghostCenterY, piece) {
-      const boardRect = boardGridEl.getBoundingClientRect();
+      // Camera
+      camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
       
-      // If outside reasonable board bounds
-      if (
-        ghostCenterX < boardRect.left - 50 ||
-        ghostCenterX > boardRect.right + 50 ||
-        ghostCenterY < boardRect.top - 50 ||
-        ghostCenterY > boardRect.bottom + 50
-      ) {
-        return null;
-      }
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
 
-      const rows = piece.shape.length;
-      const cols = piece.shape[0].length;
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+      scene.add(ambientLight);
 
-      const cellWidth = boardRect.width / GRID_SIZE;
-      const cellHeight = boardRect.height / GRID_SIZE;
+      const mainLight = new THREE.DirectionalLight(0xfff5ea, 1.2);
+      mainLight.position.set(10, 25, 5);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 2048;
+      mainLight.shadow.mapSize.height = 2048;
+      mainLight.shadow.camera.near = 0.5;
+      mainLight.shadow.camera.far = 50;
+      mainLight.shadow.camera.left = -20;
+      mainLight.shadow.camera.right = 20;
+      mainLight.shadow.camera.top = 20;
+      mainLight.shadow.camera.bottom = -20;
+      scene.add(mainLight);
 
-      // Align ghost center to top-left piece matrix offset
-      const topLeftX = ghostCenterX - (cols * cellWidth) / 2 + cellWidth / 2;
-      const topLeftY = ghostCenterY - (rows * cellHeight) / 2 + cellHeight / 2;
+      // Arena Arena Stadium Lights (Spotlights)
+      const spot1 = new THREE.SpotLight(0x38bdf8, 2, 60, Math.PI / 4);
+      spot1.position.set(-18, 20, -10);
+      scene.add(spot1);
 
-      const col = Math.round((topLeftX - boardRect.left) / cellWidth);
-      const row = Math.round((topLeftY - boardRect.top) / cellHeight);
+      const spot2 = new THREE.SpotLight(0xf43f5e, 2, 60, Math.PI / 4);
+      spot2.position.set(18, 20, -10);
+      scene.add(spot2);
 
-      return { row, col };
+      // Construct Environment
+      createHardwoodCourt();
+      createBasketballHoop();
+      createBasketball();
+
+      updateCameraPosition();
+
+      window.addEventListener('resize', onWindowResize);
     }
 
-    function canPlacePiece(shape, startRow, startCol) {
-      const rows = shape.length;
-      const cols = shape[0].length;
+    function createHardwoodCourt() {
+      // Floor Mesh
+      const floorGeo = new THREE.PlaneGeometry(50, 40);
+      
+      // Procedural Wood Texture Canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024;
+      canvas.height = 1024;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(0, 0, 1024, 1024);
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (shape[r][c] === 1) {
-            const targetR = startRow + r;
-            const targetC = startCol + c;
-
-            // Check grid boundaries
-            if (targetR < 0 || targetR >= GRID_SIZE || targetC < 0 || targetC >= GRID_SIZE) {
-              return false;
-            }
-            // Check occupied cell
-            if (board[targetR][targetC] !== null) {
-              return false;
-            }
-          }
-        }
+      // Draw Wood Planks
+      ctx.fillStyle = '#b45309';
+      for (let i = 0; i < 1024; i += 32) {
+        ctx.fillRect(0, i, 1024, 2);
       }
-      return true;
-    }
 
-    function highlightGridPlacement(clientX, clientY) {
-      clearGridHighlights();
-      if (!activeDrag) return;
+      // Court Lines (White & Key Fill)
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 12;
 
-      const ghostRect = dragGhostEl.getBoundingClientRect();
-      const centerX = ghostRect.left + ghostRect.width / 2;
-      const centerY = ghostRect.top + ghostRect.height / 2;
+      // Outer Boundary
+      ctx.strokeRect(50, 50, 924, 924);
 
-      const placement = getTargetGridPos(centerX, centerY, activeDrag.piece);
-      if (!placement) return;
+      // Paint Key Rect
+      ctx.fillStyle = 'rgba(185, 28, 28, 0.85)';
+      ctx.fillRect(362, 524, 300, 450);
+      ctx.strokeRect(362, 524, 300, 450);
 
-      const valid = canPlacePiece(activeDrag.piece.shape, placement.row, placement.col);
-      const rows = activeDrag.piece.shape.length;
-      const cols = activeDrag.piece.shape[0].length;
+      // 3-Point Arc
+      ctx.beginPath();
+      ctx.arc(512, 974, 380, Math.PI, 0, false);
+      ctx.stroke();
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (activeDrag.piece.shape[r][c] === 1) {
-            const tr = placement.row + r;
-            const tc = placement.col + c;
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
 
-            if (tr >= 0 && tr < GRID_SIZE && tc >= 0 && tc < GRID_SIZE) {
-              const cellIdx = tr * GRID_SIZE + tc;
-              const cellEl = boardGridEl.children[cellIdx];
-              if (cellEl) {
-                cellEl.classList.add(valid ? 'highlight-valid' : 'highlight-invalid');
-                hoveredCells.push(cellEl);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    function clearGridHighlights() {
-      hoveredCells.forEach(cell => {
-        cell.classList.remove('highlight-valid', 'highlight-invalid');
+      const floorMat = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.25,
+        metalness: 0.1
       });
-      hoveredCells = [];
+
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.set(0, 0, -10);
+      floor.receiveShadow = true;
+      scene.add(floor);
     }
 
-    function placePiece(piece, startRow, startCol) {
-      const rows = piece.shape.length;
-      const cols = piece.shape[0].length;
-      let blockCount = 0;
+    function createBasketballHoop() {
+      // Backboard Glass
+      const glassGeo = new THREE.BoxGeometry(6, 4, 0.15);
+      const glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.7,
+        roughness: 0.1,
+        transmission: 0.9,
+        thickness: 0.5
+      });
+      backboard = new THREE.Mesh(glassGeo, glassMat);
+      backboard.position.set(0, 6.8, -19.2);
+      backboard.castShadow = true;
+      scene.add(backboard);
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (piece.shape[r][c] === 1) {
-            board[startRow + r][startCol + c] = piece.color;
-            blockCount++;
-          }
-        }
-      }
+      // Backboard White Inner Border
+      const frameGeo = new THREE.BoxGeometry(2.2, 1.6, 0.18);
+      const frameMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+      const frame = new THREE.Mesh(frameGeo, frameMat);
+      frame.position.set(0, 6.0, -19.1);
+      scene.add(frame);
 
-      // Add base score for placing blocks
-      addScore(blockCount * 10);
-      renderBoard();
+      // Metallic Orange Rim
+      const rimGeo = new THREE.TorusGeometry(HOOP_RADIUS, 0.06, 16, 32);
+      const rimMat = new THREE.MeshStandardMaterial({
+        color: 0xea580c,
+        metalness: 0.8,
+        roughness: 0.2
+      });
+      rim = new THREE.Mesh(rimGeo, rimMat);
+      rim.rotation.x = Math.PI / 2;
+      rim.position.copy(HOOP_POS);
+      rim.castShadow = true;
+      scene.add(rim);
+
+      // Support Structure Pole
+      const poleGeo = new THREE.CylinderGeometry(0.25, 0.25, 8, 16);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(0, 4, -20);
+      scene.add(pole);
+
+      // Mesh Net (Cylinder cone approximation)
+      const netGeo = new THREE.CylinderGeometry(HOOP_RADIUS, 0.45, 1.2, 16, 8, true);
+      const netMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.7
+      });
+      net = new THREE.Mesh(netGeo, netMat);
+      net.position.set(0, HOOP_POS.y - 0.6, HOOP_POS.z);
+      scene.add(net);
     }
 
-    /* ==========================================================================
-       7. LINE CLEARS, COMBOS & SCORING
-       ========================================================================== */
-    function processLineClears(placedRow, placedCol, piece) {
-      const rowsToClear = [];
-      const colsToClear = [];
+    function createBasketball() {
+      const ballGeo = new THREE.SphereGeometry(ballPhysics.radius, 32, 32);
+      
+      // Procedural Leather Texture with Seams
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(0, 0, 512, 256);
 
-      // Check complete rows
-      for (let r = 0; r < GRID_SIZE; r++) {
-        let full = true;
-        for (let c = 0; c < GRID_SIZE; c++) {
-          if (board[r][c] === null) {
-            full = false;
-            break;
-          }
-        }
-        if (full) rowsToClear.push(r);
-      }
+      // Black Seam Lines
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(0, 0, 512, 256);
 
-      // Check complete columns
-      for (let c = 0; c < GRID_SIZE; c++) {
-        let full = true;
-        for (let r = 0; r < GRID_SIZE; r++) {
-          if (board[r][c] === null) {
-            full = false;
-            break;
-          }
-        }
-        if (full) colsToClear.push(c);
-      }
+      ctx.beginPath();
+      ctx.arc(256, 128, 100, 0, Math.PI * 2);
+      ctx.stroke();
 
-      const totalLines = rowsToClear.length + colsToClear.length;
+      const texture = new THREE.CanvasTexture(canvas);
+      const ballMat = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.4,
+        metalness: 0.1
+      });
 
-      if (totalLines > 0) {
-        comboStreak++;
-        sound.playClear(totalLines);
+      ball = new THREE.Mesh(ballGeo, ballMat);
+      ball.castShadow = true;
+      scene.add(ball);
 
-        // Collect unique cells to animate & clear
-        const cellsToAnimate = new Set();
-        rowsToClear.forEach(r => {
-          for (let c = 0; c < GRID_SIZE; c++) cellsToAnimate.add(`${r},${c}`);
-        });
-        colsToClear.forEach(c => {
-          for (let r = 0; r < GRID_SIZE; r++) cellsToAnimate.add(`${r},${c}`);
-        });
+      resetBallToPlayer();
+    }
 
-        // Trigger Particle Bursts & Cell Animation
-        cellsToAnimate.forEach(coord => {
-          const [r, c] = coord.split(',').map(Number);
-          const cellIdx = r * GRID_SIZE + c;
-          const cellEl = boardGridEl.children[cellIdx];
-          const colorClass = board[r][c];
+    function resetBallToPlayer() {
+      ballPhysics.active = false;
+      ballPhysics.pos.copy(playerPos).add(new THREE.Vector3(0, 2.5, 0));
+      ballPhysics.vel.set(0, 0, 0);
+      ballPhysics.rot.set(0, 0, 0);
 
-          if (cellEl && cellEl.firstElementChild) {
-            cellEl.firstElementChild.classList.add('clear-anim');
-          }
+      ball.position.copy(ballPhysics.pos);
+      updateDistanceUI();
+    }
 
-          // Trigger Canvas Particles
-          if (particleSys && colorClass) {
-            const rect = cellEl.getBoundingClientRect();
-            const boardRect = particleCanvas.getBoundingClientRect();
-            const x = rect.left - boardRect.left + rect.width / 2;
-            const y = rect.top - boardRect.top + rect.height / 2;
-            particleSys.spawnCellBurst(x, y, COLOR_HEX_MAP[colorClass] || '#ffffff');
-          }
-        });
+    /* ==========================================
+       3. 2K SHOT METER & PHYSICS CALCULATIONS
+       ========================================== */
+    let isHoldingShot = false;
+    let shotMeterValue = 0; // 0 to 100
+    let meterDirection = 1;
+    let currentMode = 'shootaround'; // 'shootaround', '3point', 'dunk'
+    let score = 0;
+    let streak = 0;
+    let highScore = localStorage.getItem('2k_hoops_best') || 0;
+    let gameTimer = 60;
+    let timerInterval = null;
 
-        // Calculate score with combo multiplier
-        const baseLinePoints = totalLines * 100;
-        const comboBonus = (comboStreak - 1) * 50;
-        const multiLineBonus = totalLines > 1 ? totalLines * 50 : 0;
-        const totalPoints = baseLinePoints + comboBonus + multiLineBonus;
+    // Shot Meter UI Elements
+    const shotMeterContainer = document.getElementById('shot-meter-container');
+    const shotMeterBar = document.getElementById('shot-meter-bar');
+    const meterMarker = document.getElementById('meter-marker');
+    const gradeToast = document.getElementById('grade-toast');
+    const greenSplash = document.getElementById('green-splash');
 
-        addScore(totalPoints);
+    function updateDistanceUI() {
+      const dist = playerPos.distanceTo(HOOP_POS) * 1.2; // Convert to feet equivalent
+      document.getElementById('distance-val').innerText = `${dist.toFixed(1)} FT`;
+    }
 
-        // UI Popups & Feedback
-        showFloatingScore(`+${totalPoints}`);
-        if (comboStreak > 1 || totalLines > 1) {
-          showComboBanner(totalLines, comboStreak);
-        }
+    function startShot() {
+      if (ballPhysics.active) return;
+      audioEngine.init();
 
-        // Delay board matrix clear to match visual animation
-        setTimeout(() => {
-          cellsToAnimate.forEach(coord => {
-            const [r, c] = coord.split(',').map(Number);
-            board[r][c] = null;
-          });
-          renderBoard();
-        }, 220);
+      isHoldingShot = true;
+      shotMeterValue = 0;
+      meterDirection = 1;
+      shotMeterContainer.style.display = 'block';
+    }
 
+    function releaseShot() {
+      if (!isHoldingShot) return;
+      isHoldingShot = false;
+      shotMeterContainer.style.display = 'none';
+
+      // Evaluate Shot Release Timing
+      // Green Release Zone is between 80% and 88%
+      const value = shotMeterValue;
+      let grade = '';
+      let quality = 0; // 0: Miss, 1: Make, 2: Perfect Green
+
+      if (value >= 80 && value <= 88) {
+        grade = 'PERFECT RELEASE!';
+        quality = 2; // Green
+      } else if (value >= 72 && value < 80) {
+        grade = 'SLIGHTLY EARLY';
+        quality = 1;
+      } else if (value > 88 && value <= 95) {
+        grade = 'SLIGHTLY LATE';
+        quality = 1;
+      } else if (value < 72) {
+        grade = 'VERY EARLY - AIRBALL';
+        quality = 0;
       } else {
-        comboStreak = 0; // Reset streak if no lines cleared
+        grade = 'VERY LATE - OFF RIM';
+        quality = 0;
       }
+
+      showGradeToast(grade, quality);
+      executeBallPhysicsLaunch(quality);
     }
 
-    function addScore(pts) {
-      score += pts;
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem('block_blast_best', bestScore.toString());
+    function showGradeToast(grade, quality) {
+      gradeToast.innerText = grade;
+      gradeToast.style.opacity = '1';
+      
+      if (quality === 2) {
+        gradeToast.className = 'text-green-400 font-extrabold';
+        greenSplash.classList.add('active');
+        audioEngine.playGreenCheer();
+        setTimeout(() => greenSplash.classList.remove('active'), 1200);
+      } else if (quality === 1) {
+        gradeToast.className = 'text-amber-300 font-extrabold';
+      } else {
+        gradeToast.className = 'text-red-400 font-extrabold';
       }
-      updateScoreUI();
+
+      setTimeout(() => {
+        gradeToast.style.opacity = '0';
+      }, 1500);
     }
 
-    function updateScoreUI() {
-      scoreTextEl.textContent = score;
-      bestScoreTextEl.textContent = bestScore;
+    function executeBallPhysicsLaunch(quality) {
+      ballPhysics.active = true;
+
+      // Calculate trajectory vector to hoop
+      const start = ballPhysics.pos.clone();
+      const target = HOOP_POS.clone();
+
+      if (quality === 2) {
+        // Perfect Swish Arc
+        target.y += 0.2; 
+      } else if (quality === 1) {
+        // Hit rim slightly or drop in
+        target.x += (Math.random() - 0.5) * 0.4;
+        target.z += (Math.random() - 0.5) * 0.4;
+      } else {
+        // Off target miss
+        target.x += (Math.random() - 0.5) * 2.0;
+        target.z += (Math.random() - 0.5) * 1.5;
+      }
+
+      const dist = start.distanceTo(target);
+      const timeToTarget = 0.9 + dist * 0.02; // seconds
+
+      // Calculate initial velocity required under gravity (g = -18)
+      const g = 18;
+      const vx = (target.x - start.x) / timeToTarget;
+      const vz = (target.z - start.z) / timeToTarget;
+      const vy = (target.y - start.y) / timeToTarget + 0.5 * g * timeToTarget;
+
+      ballPhysics.vel.set(vx, vy, vz);
+      ballPhysics.rot.set(Math.random() * 5, Math.random() * 2, 0);
+
+      ballPhysics.quality = quality;
+      ballPhysics.hasScored = false;
     }
 
-    function showFloatingScore(text) {
-      const popup = document.createElement('div');
-      popup.className = 'score-popup';
-      popup.textContent = text;
-      popup.style.left = '50%';
-      popup.style.top = '45%';
-      boardGridEl.parentElement.appendChild(popup);
-      setTimeout(() => popup.remove(), 900);
-    }
+    /* ==========================================
+       4. ANIMATION LOOP & PHYSICS UPDATES
+       ========================================== */
+    const dt = 1 / 60;
+    const gravity = -18;
 
-    function showComboBanner(lines, streak) {
-      const banner = document.createElement('div');
-      banner.className = 'combo-banner';
-      
-      let text = 'GREAT!';
-      if (lines >= 3) text = 'UNBELIEVABLE!';
-      else if (lines === 2) text = 'DOUBLE CLEAR!';
-      
-      if (streak > 1) text += ` COMBO x${streak}`;
+    function animate() {
+      requestAnimationFrame(animate);
 
-      banner.textContent = text;
-      boardGridEl.parentElement.appendChild(banner);
-      setTimeout(() => banner.remove(), 1100);
-    }
-
-    /* ==========================================================================
-       8. GAME OVER DETECTION
-       ========================================================================== */
-    function checkGameOverCondition() {
-      // Check if ANY of the remaining pieces in currentSlots can fit ANYWHERE on the board
-      let canMove = false;
-
-      for (let i = 0; i < 3; i++) {
-        const piece = currentSlots[i];
-        if (!piece) continue;
-
-        for (let r = 0; r < GRID_SIZE; r++) {
-          for (let c = 0; c < GRID_SIZE; c++) {
-            if (canPlacePiece(piece.shape, r, c)) {
-              canMove = true;
-              break;
-            }
-          }
-          if (canMove) break;
+      // Handle Shot Meter Hold Fill
+      if (isHoldingShot) {
+        shotMeterValue += meterDirection * 2.2;
+        if (shotMeterValue >= 100) {
+          shotMeterValue = 100;
+          releaseShot(); // Auto release on max limit
         }
-        if (canMove) break;
+        meterMarker.style.left = `${shotMeterValue}%`;
+        shotMeterBar.style.width = `${shotMeterValue}%`;
       }
 
-      if (!canMove && currentSlots.some(s => s !== null)) {
-        setTimeout(triggerGameOver, 500);
+      // Handle Active Ball Flight Physics
+      if (ballPhysics.active) {
+        ballPhysics.vel.y += gravity * dt;
+        ballPhysics.pos.addScaledVector(ballPhysics.vel, dt);
+
+        ball.position.copy(ballPhysics.pos);
+        ball.rotation.x += ballPhysics.rot.x * dt;
+        ball.rotation.y += ballPhysics.rot.y * dt;
+
+        // Collision Check: Floor Bounce
+        if (ballPhysics.pos.y <= ballPhysics.radius) {
+          ballPhysics.pos.y = ballPhysics.radius;
+          ballPhysics.vel.y *= -0.65; // Bounce elasticity
+          ballPhysics.vel.x *= 0.8;
+          ballPhysics.vel.z *= 0.8;
+
+          if (Math.abs(ballPhysics.vel.y) > 1.0) {
+            audioEngine.playBounce();
+          } else {
+            // Ball came to rest
+            setTimeout(resetBallToPlayer, 600);
+          }
+        }
+
+        // Collision Check: Rim & Swish Scoring Area
+        const distToHoop = ballPhysics.pos.distanceTo(HOOP_POS);
+        if (distToHoop < HOOP_RADIUS + 0.2 && !ballPhysics.hasScored) {
+          if (ballPhysics.quality >= 1) {
+            // Swish / Made Shot
+            ballPhysics.hasScored = true;
+            audioEngine.playSwish();
+            registerScore(ballPhysics.quality === 2 ? 3 : 2);
+          } else {
+            // Rim Clank Miss
+            ballPhysics.vel.x *= -0.5;
+            ballPhysics.vel.z *= -0.5;
+            ballPhysics.vel.y *= 0.5;
+            audioEngine.playRimClank();
+            resetStreak();
+          }
+        }
+
+        // Collision Check: Backboard Bounce
+        if (Math.abs(ballPhysics.pos.z - (-19.1)) < 0.3 && Math.abs(ballPhysics.pos.x) < 3 && ballPhysics.pos.y > 5) {
+          ballPhysics.vel.z *= -0.6;
+          audioEngine.playRimClank();
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function registerScore(pts) {
+      score += pts;
+      streak++;
+      document.getElementById('score-val').innerText = score;
+      document.getElementById('streak-val').innerText = streak;
+
+      if (score > highScore) {
+        highScore = score;
+        document.getElementById('best-val').innerText = highScore;
+        localStorage.setItem('2k_hoops_best', highScore);
+      }
+
+      setTimeout(resetBallToPlayer, 1200);
+    }
+
+    function resetStreak() {
+      streak = 0;
+      document.getElementById('streak-val').innerText = '0';
+    }
+
+    /* ==========================================
+       5. CAMERA & SPOT MANAGEMENT
+       ========================================== */
+    function updateCameraPosition() {
+      const mode = CAM_VIEWS[currentCamIdx];
+
+      if (mode === 'broadcast') {
+        camera.position.set(0, 10, 12);
+        camera.lookAt(0, 4, -10);
+      } else if (mode === 'player') {
+        camera.position.copy(playerPos).add(new THREE.Vector3(0, 3.5, 4.5));
+        camera.lookAt(0, 5, -18);
+      } else if (mode === 'baseline') {
+        camera.position.set(0, 7, -22);
+        camera.lookAt(0, 3, -5);
       }
     }
 
-    function triggerGameOver() {
-      sound.playGameOver();
-      document.getElementById('final-score').textContent = score;
-      document.getElementById('modal-best-score').textContent = bestScore;
-      
-      gameOverModal.classList.remove('pointer-events-none');
-      gameOverModal.classList.add('opacity-100');
-      document.getElementById('modal-content').classList.remove('scale-90');
-      document.getElementById('modal-content').classList.add('scale-100');
+    function changeSpot(direction) {
+      if (ballPhysics.active) return;
+      currentSpotIdx = (currentSpotIdx + direction + SPOTS.length) % SPOTS.length;
+      playerPos.copy(SPOTS[currentSpotIdx].pos);
+      resetBallToPlayer();
+      if (CAM_VIEWS[currentCamIdx] === 'player') updateCameraPosition();
     }
 
-    function hideGameOver() {
-      gameOverModal.classList.add('pointer-events-none');
-      gameOverModal.classList.remove('opacity-100');
-      document.getElementById('modal-content').classList.remove('scale-100');
-      document.getElementById('modal-content').classList.add('scale-90');
+    /* ==========================================
+       6. GAME MODES & CONTROLS
+       ========================================== */
+    function setGameMode(mode) {
+      currentMode = mode;
+      score = 0;
+      streak = 0;
+      document.getElementById('score-val').innerText = '0';
+      document.getElementById('streak-val').innerText = '0';
+
+      if (timerInterval) clearInterval(timerInterval);
+
+      if (mode === '3point') {
+        document.getElementById('mode-label').innerText = '3-POINT CONTEST';
+        gameTimer = 60;
+        document.getElementById('timer-val').innerText = gameTimer;
+
+        timerInterval = setInterval(() => {
+          gameTimer--;
+          document.getElementById('timer-val').innerText = gameTimer;
+          if (gameTimer <= 0) {
+            clearInterval(timerInterval);
+            alert(`Time's up! Final Score: ${score}`);
+            document.getElementById('menu-modal').classList.remove('hidden');
+          }
+        }, 1000);
+      } else {
+        document.getElementById('mode-label').innerText = 'FREE SHOOTAROUND';
+        document.getElementById('timer-val').innerText = '--';
+      }
+
+      document.getElementById('menu-modal').classList.add('hidden');
+      resetBallToPlayer();
     }
 
-    // Start Game on Window Load
-    window.onload = initGame;
+    // Keyboard & Pointer Events
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !e.repeat) {
+        startShot();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        releaseShot();
+      }
+    });
+
+    const shootBtn = document.getElementById('btn-shoot');
+    shootBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      startShot();
+    });
+    shootBtn.addEventListener('pointerup', (e) => {
+      e.preventDefault();
+      releaseShot();
+    });
+
+    document.getElementById('spot-left').addEventListener('click', () => changeSpot(-1));
+    document.getElementById('spot-right').addEventListener('click', () => changeSpot(1));
+    document.getElementById('spot-random').addEventListener('click', () => changeSpot(Math.floor(Math.random() * SPOTS.length)));
+
+    document.getElementById('btn-cam').addEventListener('click', () => {
+      currentCamIdx = (currentCamIdx + 1) % CAM_VIEWS.length;
+      updateCameraPosition();
+    });
+
+    const audioBtn = document.getElementById('btn-audio');
+    const audioIcon = document.getElementById('audio-icon');
+    audioBtn.addEventListener('click', () => {
+      audioEngine.muted = !audioEngine.muted;
+      audioIcon.className = audioEngine.muted ? 'fa-solid fa-volume-xmark text-sm' : 'fa-solid fa-volume-high text-sm';
+    });
+
+    document.getElementById('btn-menu').addEventListener('click', () => {
+      document.getElementById('menu-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-start-game').addEventListener('click', () => {
+      setGameMode(currentMode);
+    });
+
+    document.getElementById('mode-shootaround').addEventListener('click', () => setGameMode('shootaround'));
+    document.getElementById('mode-3point').addEventListener('click', () => setGameMode('3point'));
+    document.getElementById('mode-dunk').addEventListener('click', () => {
+      playerPos.set(0, 0, -10); // Move close to rim
+      setGameMode('dunk');
+    });
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Start 3D Engine & Animation
+    init3D();
+    animate();
   </script>
 </body>
 </html>
